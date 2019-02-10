@@ -14,13 +14,16 @@ RUN /debootstrap/debootstrap --second-stage
 RUN test ! -f /etc/manpath.config || sed -i 's/^#NOCACHE/NOCACHE/' /etc/manpath.config
 RUN rm -rf /var/cache/man
 
-# add jessie backports
-RUN echo 'deb http://ftp.debian.org/debian jessie-backports main' >/etc/apt/sources.list.d/jessie-backports.list
+# add jessie main repos and update
+RUN echo 'deb http://deb.debian.org/debian-security/ jessie/updates main' >/etc/apt/sources.list.d/jessie-security.list
+RUN echo 'deb http://deb.debian.org/debian jessie-updates main' >/etc/apt/sources.list.d/jessie-updates.list
+RUN apt-get update && apt-get -y upgrade
 
 # some useful packages in a base machine image
 RUN apt-get update && apt-get install --no-install-recommends -y openssh-server lsb-release sudo ifenslave curl mdadm jq apt-transport-https tcpdump nano vim jq python python-yaml
 
-# latest kernel from backports (recent 4.x series)
+# add jessie backports and install latest kernel from backports
+RUN echo 'deb http://ftp.debian.org/debian jessie-backports main' >/etc/apt/sources.list.d/jessie-backports.list
 RUN apt-get update && apt-get -t jessie-backports install -y linux-image-amd64
 
 # clean up other files left around by debootstrap
